@@ -4,7 +4,10 @@ FROM diegosouzapw/omniroute:latest AS omniroute-base
 # Stage 2: Bangun ekosistem baru pakai OS Node 22 Slim murni (bebas distroless)
 FROM node:22-slim
 
-# Install OpenClaw pakai NPM bawaan (Gak bakal kena limit RAM/Storage karena ini dieksekusi di server GitHub, bukan ClawCloud)
+# 🔥 SOLUSI PERMANEN: Install Git & dependensi build dasar sebelum NPM berjalan, lalu bersihkan cache instalasinya biar image tetap kecil.
+RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
+
+# Install OpenClaw pakai NPM bawaan
 RUN npm install -g openclaw
 
 # Set variabel environment dasar
