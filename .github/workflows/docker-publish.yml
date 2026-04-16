@@ -2,8 +2,12 @@ name: Build and Publish Custom OmniRoute
 
 on:
   push:
-    branches: [ "main" ] # Akan otomatis build tiap lu nge-push ke branch main
-  workflow_dispatch: # Bikin tombol manual build di tab Actions
+    branches: [ "main" ]
+  workflow_dispatch:
+  schedule:
+    # GitHub pakai zona waktu UTC. 
+    # Jam 17:00 UTC = Jam 00:00 WIB (Tengah Malam di Jakarta)
+    - cron: '0 17 * * *'
 
 env:
   REGISTRY: ghcr.io
@@ -32,6 +36,10 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          # Bikin tag 'latest' otomatis menimpa yang lama
+          tags: |
+            type=raw,value=latest
+            type=sha
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
@@ -40,3 +48,6 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          # DUA BARIS SAKTI ANTI-AMNESIA/ANTI-MALAS:
+          pull: true      # Memaksa Docker narik image 'omniroute:latest' & 'node:22-slim' paling baru dari server
+          no-cache: true  # Memaksa Docker nge-run 'npm install -g openclaw' dari nol biar dapet versi ter-update
